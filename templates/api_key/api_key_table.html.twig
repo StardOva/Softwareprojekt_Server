@@ -1,0 +1,20 @@
+<div class="api_keys_table">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">API-Key</th>
+            <th scope="col">Datenbank-Größe</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for apiKey in  apiKeys %}
+            <tr>
+                <th scope="row">{{ apiKey.id }}</th>
+                <td>{{ apiKey.apiKey }}</td>
+                <td>TODO</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

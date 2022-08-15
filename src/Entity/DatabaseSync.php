@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\BlobType;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DatabaseSyncRepository::class)]
+#[ORM\Table(name: 'database_sync')]
 class DatabaseSync
 {
     #[ORM\Id]
@@ -14,10 +15,10 @@ class DatabaseSync
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'uuid')]
     private ?string $api_key = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?BlobType $client_db = null;
 
     public function getId(): ?int

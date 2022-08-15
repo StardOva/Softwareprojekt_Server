@@ -1,0 +1,45 @@
+{% block body %}
+
+    {{ include('base/flash.html.twig') }}
+
+    ABC im Block KEKW
+
+    <div id="api_keys_table">
+
+    </div>
+
+    <button class="btn btn-primary" type="button" id="addApiKeyBtn">
+        API-Key generieren
+    </button>
+
+
+    <script>
+        // TODO: Encore und node.js installieren und das in Dateien auslagern
+        getApiKeys = function () {
+            $.ajax({
+                url: '/api_key',
+                success: function (result) {
+                    $('#api_keys_table').html(result);
+                }
+            })
+        };
+
+        $(document).ready(function () {
+            getApiKeys();
+        });
+
+        $('#addApiKeyBtn').click(function () {
+            $.ajax({
+                url: '/create/api_key',
+                method: 'POST',
+                success: function (result) {
+                    getApiKeys();
+                    $('#flashes').html(result)
+                }
+            })
+        });
+
+    </script>
+
+
+{% endblock %}
