@@ -18,6 +18,9 @@ class DatabaseSync
     #[ORM\Column(type: 'uuid')]
     private ?string $api_key = null;
 
+    #[ORM\Column(type: 'string')]
+    private ?string $db_filename = null;
+
     #[ORM\Column(nullable: true)]
     private ?BlobType $client_db = null;
 
@@ -47,6 +50,24 @@ class DatabaseSync
     {
         $this->client_db = $client_db;
 
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDbFilename(): ?string
+    {
+        return $this->db_filename;
+    }
+
+    /**
+     * @param string|null $db_filename
+     * @return DatabaseSync
+     */
+    public function setDbFilename(?string $db_filename): self
+    {
+        $this->db_filename = $db_filename;
         return $this;
     }
 }

@@ -4,6 +4,7 @@
         <tr>
             <th scope="col">ID</th>
             <th scope="col">API-Key</th>
+            <th scope="col">Datenbank</th>
             <th scope="col">Datenbank-Größe</th>
         </tr>
         </thead>
@@ -12,6 +13,12 @@
             <tr>
                 <th scope="row">{{ apiKey.id }}</th>
                 <td>{{ apiKey.apiKey }}</td>
+                <td>
+                    <form action="" method="post" enctype="multipart/form-data">
+                        <input type="file" name="fileToUpload" id="fileToUpload">
+                        <input type="submit" value="Hochladen" name="submit">
+                    </form>
+                </td>
                 <td>TODO</td>
             </tr>
         {% endfor %}
