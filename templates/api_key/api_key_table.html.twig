@@ -2,7 +2,7 @@
     <table class="table table-striped">
         <thead>
         <tr>
-            <th scope="col">ID</th>
+            <th scope="col">Nr</th>
             <th scope="col">API-Key</th>
             <th scope="col">Datenbank</th>
             <th scope="col">Datenbank-Größe</th>
@@ -11,11 +11,16 @@
         <tbody>
         {% for apiKey in  apiKeys %}
             <tr>
-                <th scope="row">{{ apiKey.id }}</th>
+                <th scope="row">todo</th>
                 <td>{{ apiKey.apiKey }}</td>
                 <td>
-                    <form action="" method="post" enctype="multipart/form-data">
-                        <input type="file" name="fileToUpload" id="fileToUpload">
+                    {% if apiKey.dbFilename is not empty %}
+                        <a href="{{ asset('uploads/db/' ~ apiKey.dbFilename) }}"
+                           download="">{{ apiKey.dbFilename }}</a>
+                    {% endif %}
+                    <form action="{{ path('upload_database') }}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="api_key" value="{{ apiKey.apiKey }}">
+                        <input type="file" name="db_file" id="db_file">
                         <input type="submit" value="Hochladen" name="submit">
                     </form>
                 </td>

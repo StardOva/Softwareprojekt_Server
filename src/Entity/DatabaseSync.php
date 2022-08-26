@@ -11,23 +11,16 @@ use Doctrine\ORM\Mapping as ORM;
 class DatabaseSync
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column(type: 'uuid')]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    #[ORM\Column(type: 'uuid', unique: true)]
     private ?string $api_key = null;
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $db_filename = null;
 
     #[ORM\Column(nullable: true)]
     private ?BlobType $client_db = null;
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getApiKey(): ?string
     {

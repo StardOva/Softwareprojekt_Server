@@ -30,11 +30,11 @@
 
         $('#addApiKeyBtn').click(function () {
             $.ajax({
-                url: '/create/api_key',
+                url: '/api_key/create',
                 method: 'POST',
                 success: function (result) {
                     getApiKeys();
-                    $('#flashes').html(result)
+                    $('#flashes').append(result)
                 }
             })
         });
