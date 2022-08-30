@@ -5,6 +5,7 @@ namespace App\Service;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\VarDumper\VarDumper;
 
 class FileUploader
 {
@@ -21,12 +22,13 @@ class FileUploader
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
-        $fileName = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+        $fileName = $safeFilename . '.' . $file->getClientOriginalExtension();
 
         try {
             $file->move($this->getTargetDirectory(), $fileName);
         } catch (FileException $e) {
             // ... handle exception if something happens during file upload
+            VarDumper::dump($file);
         }
 
         return $fileName;

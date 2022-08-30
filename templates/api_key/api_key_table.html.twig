@@ -2,7 +2,7 @@
     <table class="table table-striped">
         <thead>
         <tr>
-            <th scope="col">Nr</th>
+            <th scope="col">Nr.</th>
             <th scope="col">API-Key</th>
             <th scope="col">Datenbank</th>
             <th scope="col">Datenbank-Größe</th>
@@ -25,7 +25,7 @@
                         <input type="submit" value="Hochladen" name="submit">
                     </form>
                 </td>
-                <td>TODO</td>
+                <td>{{ apiKey.fileSize | format_bytes}}</td>
             </tr>
         {% endfor %}
         </tbody>

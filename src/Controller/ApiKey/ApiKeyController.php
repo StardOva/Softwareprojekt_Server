@@ -7,10 +7,10 @@ use App\Service\FileUploader;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
@@ -69,7 +69,11 @@ class ApiKeyController extends AbstractController
 
         $file = $request->files->get('db_file');
 
-        if (empty($file)) {
+        // Dateigröße setzen
+        $dbSync->setFileSize($file->getSize());
+
+        // Prüfen ob Datei existiert und den richtigen Typ hat
+        if (empty($file) || !$file instanceof UploadedFile) {
             return new Response("No file specified",
                 Response::HTTP_UNPROCESSABLE_ENTITY, ['content-type' => 'text/plain']);
         }

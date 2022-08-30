@@ -26,3 +26,12 @@ services:
     App\Service\FileUploader:
         arguments:
             $targetDirectory: '%db_directory%'
+
+    App\Twig\Extension\ByteConversionTwigExtension:
+        arguments:
+            - '@service_container'
+        tags:
+            - { name: twig.extension }
+
+
+

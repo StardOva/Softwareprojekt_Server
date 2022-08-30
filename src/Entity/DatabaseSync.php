@@ -22,6 +22,9 @@ class DatabaseSync
     #[ORM\Column(nullable: true)]
     private ?BlobType $client_db = null;
 
+    #[ORM\Column(type: 'float')]
+    private ?float $file_size = null;
+
     public function getApiKey(): ?string
     {
         return $this->api_key;
@@ -62,5 +65,23 @@ class DatabaseSync
     {
         $this->db_filename = $db_filename;
         return $this;
+    }
+
+    /**
+     * @param float|null $file_size
+     * @return DatabaseSync
+     */
+    public function setFileSize(?float $file_size): DatabaseSync
+    {
+        $this->file_size = $file_size;
+        return $this;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getFileSize(): ?float
+    {
+        return $this->file_size;
     }
 }
