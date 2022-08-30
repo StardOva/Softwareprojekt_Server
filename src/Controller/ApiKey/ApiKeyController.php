@@ -6,10 +6,17 @@ use App\Entity\DatabaseSync;
 use App\Service\FileUploader;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Validation;
+
+use Symfony\Component\Validator\Constraints\Uuid as UuidConstraint;
 
 class ApiKeyController extends AbstractController
 {
@@ -30,8 +37,8 @@ class ApiKeyController extends AbstractController
         ]);
     }
 
-    #[Route('/api_key', methods: ['GET'])]
-    public function getApiKeyTable(Request $request, ManagerRegistry $doctrine): Response
+    #[Route('/api_key', name: 'get_api_key_table', methods: ['GET'])]
+    public function getApiKeyTable(ManagerRegistry $doctrine): Response
     {
         $entityManager = $doctrine->getManager();
         $allKeys = $entityManager->getRepository(DatabaseSync::class)->findAll();
@@ -45,19 +52,18 @@ class ApiKeyController extends AbstractController
         ]);
     }
 
-    #[Route('/api_key/database', name: 'upload_database', methods: ['POST'])]
-    public function uploadDatabase(Request $request, FileUploader $uploader, ManagerRegistry $doctrine): Response
+    #[Route('/database_sync/upload/{apiKey}', name: 'upload_database', methods: ['POST'])]
+    public function uploadDatabase(Request         $request, FileUploader $uploader,
+                                   ManagerRegistry $doctrine, string $apiKey): Response
     {
         $entityManager = $doctrine->getManager();
         $repo = $entityManager->getRepository(DatabaseSync::class);
-
-        $apiKey = $request->get("api_key");
 
         $dbSync = $repo->find($apiKey);
 
         // api key prüfen
         if ($dbSync === null) {
-            return new Response("Operation not allowed", Response::HTTP_BAD_REQUEST,
+            return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
                 ['content-type' => 'text/plain']);
         }
 
@@ -80,9 +86,7 @@ class ApiKeyController extends AbstractController
         $fileName = $uploader->upload($file);
 
         // Dateinamen in der Entity updaten
-        $dbSync = $repo
-            ->find($apiKey)
-            ->setDbFilename($fileName);
+        $dbSync->setDbFilename($fileName);
 
         $entityManager->persist($dbSync);
         $entityManager->flush();
@@ -90,6 +94,57 @@ class ApiKeyController extends AbstractController
         $this->addFlash('success', 'Datei wurde erfolgreich hochgeladen.');
 
         return $this->redirectToRoute('baseView');
+    }
+
+    #[Route('/database_sync/download/{apiKey}', name: 'download_database', methods: ['GET'])]
+    public function downloadDatabase(Request $request, Response $response, ManagerRegistry $doctrine, string $apiKey): Response
+    {
+        $entityManager = $doctrine->getManager();
+        $repo = $entityManager->getRepository(DatabaseSync::class);
+
+        // api key Format prüfen
+        if ($this->isValidUuid($apiKey)) {
+
+            $dbSync = $repo->find($apiKey);
+
+            // api key prüfen
+            if ($dbSync === null) {
+                return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
+                    ['content-type' => 'text/plain']);
+            }
+
+            $filePath = $this->getParameter('db_directory') . '/' . $dbSync->getDbFilename();
+
+            // MimeType raten
+            $mimeTypes = new MimeTypes();
+            $mimeType = $mimeTypes->guessMimeType($filePath);
+
+
+
+            $response = new BinaryFileResponse($filePath);
+
+            $response->headers->set('Content-Type', $mimeType);
+            $response->setContentDisposition(
+                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                $dbSync->getDbFilename()
+            );
+
+            return $response;
+        }
+
+        return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
+            ['content-type' => 'text/plain']);
+
+    }
+
+    private function isValidUuid(string $uuidToValidate): bool
+    {
+        $validator = Validation::createValidator();
+
+        $uuidConstraint = new UuidConstraint();
+        $uuidConstraint->message = Response::HTTP_FORBIDDEN;
+
+        return !empty($validator->validate($uuidToValidate, $uuidConstraint));
     }
 
 }

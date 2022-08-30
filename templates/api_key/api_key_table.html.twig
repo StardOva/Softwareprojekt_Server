@@ -18,7 +18,8 @@
                         <a href="{{ asset('uploads/db/' ~ apiKey.dbFilename) }}"
                            download="">{{ apiKey.dbFilename }}</a>
                     {% endif %}
-                    <form action="{{ path('upload_database') }}" method="post" enctype="multipart/form-data">
+                    <form action="{{ path('upload_database', {'apiKey': apiKey.apiKey}) }}" method="post"
+                          enctype="multipart/form-data">
                         <input type="hidden" name="api_key" value="{{ apiKey.apiKey }}">
                         <input type="file" name="db_file" id="db_file">
                         <input type="submit" value="Hochladen" name="submit">

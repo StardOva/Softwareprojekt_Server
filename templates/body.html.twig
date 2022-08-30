@@ -17,7 +17,7 @@
         // TODO: Encore und node.js installieren und das in Dateien auslagern
         getApiKeys = function () {
             $.ajax({
-                url: '/api_key',
+                url: '{{ path('get_api_key_table') }}',
                 success: function (result) {
                     $('#api_keys_table').html(result);
                 }
@@ -30,7 +30,7 @@
 
         $('#addApiKeyBtn').click(function () {
             $.ajax({
-                url: '/api_key/create',
+                url: '{{ path('create_api_key') }}',
                 method: 'POST',
                 success: function (result) {
                     getApiKeys();
