@@ -97,7 +97,7 @@ class ApiKeyController extends AbstractController
     }
 
     #[Route('/database_sync/download/{apiKey}', name: 'download_database', methods: ['GET'])]
-    public function downloadDatabase(Request $request, Response $response, ManagerRegistry $doctrine, string $apiKey): Response
+    public function downloadDatabase(ManagerRegistry $doctrine, string $apiKey): Response
     {
         $entityManager = $doctrine->getManager();
         $repo = $entityManager->getRepository(DatabaseSync::class);
@@ -118,8 +118,6 @@ class ApiKeyController extends AbstractController
             // MimeType raten
             $mimeTypes = new MimeTypes();
             $mimeType = $mimeTypes->guessMimeType($filePath);
-
-
 
             $response = new BinaryFileResponse($filePath);
 

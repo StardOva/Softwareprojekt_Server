@@ -11,11 +11,11 @@
         <tbody>
         {% for apiKey in  apiKeys %}
             <tr>
-                <th scope="row">todo</th>
+                <th scope="row">{{ loop.index }}</th>
                 <td>{{ apiKey.apiKey }}</td>
                 <td>
                     {% if apiKey.dbFilename is not empty %}
-                        <a href="{{ asset('uploads/db/' ~ apiKey.dbFilename) }}"
+                        <a href="{{ path('download_database', {'apiKey': apiKey.apiKey}) }}"
                            download="">{{ apiKey.dbFilename }}</a>
                     {% endif %}
                     <form action="{{ path('upload_database', {'apiKey': apiKey.apiKey}) }}" method="post"
