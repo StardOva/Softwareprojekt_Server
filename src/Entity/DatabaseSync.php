@@ -22,7 +22,7 @@ class DatabaseSync
     #[ORM\Column(nullable: true)]
     private ?BlobType $client_db = null;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column(type: 'float', nullable: true)]
     private ?float $file_size = null;
 
     public function getApiKey(): ?string

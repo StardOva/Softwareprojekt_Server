@@ -28,6 +28,7 @@ class ApiKeyController extends AbstractController
 
         $apiKey = new DatabaseSync();
         $apiKey->setApiKey($uuid);
+        $apiKey->setFileSize(0);
         $entityManager = $doctrine->getManager();
         $entityManager->persist($apiKey);
         $entityManager->flush();
@@ -52,7 +53,7 @@ class ApiKeyController extends AbstractController
         ]);
     }
 
-    #[Route('/database_sync/upload/{apiKey}', name: 'upload_database', methods: ['POST'])]
+    #[Route('/database_sync/{apiKey}', name: 'upload_database', methods: ['POST'])]
     public function uploadDatabase(Request         $request, FileUploader $uploader,
                                    ManagerRegistry $doctrine, string $apiKey): Response
     {
@@ -100,7 +101,7 @@ class ApiKeyController extends AbstractController
         return $this->redirectToRoute('baseView');
     }
 
-    #[Route('/database_sync/download/{apiKey}', name: 'download_database', methods: ['GET'])]
+    #[Route('/database_sync/{apiKey}', name: 'download_database', methods: ['GET'])]
     public function downloadDatabase(ManagerRegistry $doctrine, string $apiKey): Response
     {
         $entityManager = $doctrine->getManager();
