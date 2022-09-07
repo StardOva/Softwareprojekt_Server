@@ -132,6 +132,8 @@ class ApiKeyController extends AbstractController
                 $dbSync->getDbFilename()
             );
 
+            $response->headers->set('Connection', 'close');
+
             return $response;
         }
 
