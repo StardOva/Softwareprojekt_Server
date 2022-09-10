@@ -16,11 +16,10 @@
                 <td>
                     {% if apiKey.dbFilename is not empty %}
                         <a href="{{ path('download_database', {'apiKey': apiKey.apiKey}) }}"
-                           download="">{{ apiKey.dbFilename }}</a>
+                           download="{{ apiKey.dbFilename }}">{{ apiKey.dbFilename }}</a>
                     {% endif %}
                     <form action="{{ path('upload_database', {'apiKey': apiKey.apiKey}) }}" method="post"
                           enctype="multipart/form-data">
-                        <input type="hidden" name="api_key" value="{{ apiKey.apiKey }}">
                         <input type="file" name="db_file" id="db_file">
                         <input type="submit" value="Hochladen" name="submit">
                     </form>

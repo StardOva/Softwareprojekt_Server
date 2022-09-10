@@ -88,7 +88,7 @@ class ApiKeyController extends AbstractController
         }
 
         // Datei uploaden
-        $fileName = $uploader->upload($file);
+        $fileName = $uploader->upload($file, $apiKey);
 
         // Dateinamen in der Entity updaten
         $dbSync->setDbFilename($fileName);
@@ -129,7 +129,7 @@ class ApiKeyController extends AbstractController
             $response->headers->set('Content-Type', $mimeType);
             $response->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                $dbSync->getDbFilename()
+                str_replace('_' . $apiKey, '', $dbSync->getDbFilename())
             );
 
             $response->headers->set('Connection', 'close');

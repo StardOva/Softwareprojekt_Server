@@ -18,11 +18,12 @@ class FileUploader
         $this->slugger = $slugger;
     }
 
-    public function upload(UploadedFile $file): string
+    public function upload(UploadedFile $file, string $apiKey): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
-        $fileName = $safeFilename . '.' . $file->getClientOriginalExtension();
+        // Api Key als UUID nehmen
+        $fileName = $safeFilename . '_' . $apiKey . '.' . $file->getClientOriginalExtension() ;
 
         try {
             $file->move($this->getTargetDirectory(), $fileName);
