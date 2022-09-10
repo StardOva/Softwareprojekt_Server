@@ -70,6 +70,10 @@ class ApiKeyController extends AbstractController
 
         $file = $request->files->get('db_file');
 
+        if ($file === null) {
+            return $this->redirectToRoute('baseView');
+        }
+
         // Dateigröße setzen
         $dbSync->setFileSize($file->getSize());
 
@@ -140,6 +144,81 @@ class ApiKeyController extends AbstractController
         return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
             ['content-type' => 'text/plain']);
 
+    }
+
+    #[Route('/database_sync/{apiKey}/remove_db', name: 'remove_database', methods: ['POST'])]
+    public function removeDatabase(ManagerRegistry $doctrine, string $apiKey): Response
+    {
+        $entityManager = $doctrine->getManager();
+        $repo = $entityManager->getRepository(DatabaseSync::class);
+
+        // api key Format prüfen
+        if ($this->isValidUuid($apiKey)) {
+
+            $dbSync = $repo->find($apiKey);
+
+            // api key prüfen
+            if ($dbSync === null) {
+                return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
+                    ['content-type' => 'text/plain']);
+            }
+
+            $filePath = $this->getParameter('db_directory') . '/' . $dbSync->getDbFilename();
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
+            $dbSync->setDbFilename(null);
+            $dbSync->setFileSize(0);
+
+            $entityManager->persist($dbSync);
+            $entityManager->flush();
+
+            return $this->renderForm('base/success.html.twig', [
+                'message' => 'Datei gelöscht.'
+            ]);
+        }
+
+        return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
+            ['content-type' => 'text/plain']);
+
+    }
+
+    #[Route('/database_sync/{apiKey}', name: 'remove_api_key', methods: ['DELETE'])]
+    public function deleteApiKey(ManagerRegistry $doctrine, string $apiKey): Response
+    {
+        $entityManager = $doctrine->getManager();
+        $repo = $entityManager->getRepository(DatabaseSync::class);
+
+        // api key Format prüfen
+        if ($this->isValidUuid($apiKey)) {
+
+            $dbSync = $repo->find($apiKey);
+
+            // api key prüfen
+            if ($dbSync === null) {
+                return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
+                    ['content-type' => 'text/plain']);
+            }
+
+            if (!empty($dbSync->getDbFilename())) {
+                // Datei löschen falls sie existiert
+                $filePath = $this->getParameter('db_directory') . '/' . $dbSync->getDbFilename();
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+
+            // Datenbank Eintrag löschen
+            $repo->remove($dbSync, true);
+
+            return $this->renderForm('base/success.html.twig', [
+                'message' => 'API-Key gelöscht.'
+            ]);
+        }
+
+        return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
+            ['content-type' => 'text/plain']);
     }
 
     private function isValidUuid(string $uuidToValidate): bool

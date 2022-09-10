@@ -6,6 +6,7 @@
             <th scope="col">API-Key</th>
             <th scope="col">Datenbank</th>
             <th scope="col">Datenbank-Größe</th>
+            <th scope="col">Löschen</th>
         </tr>
         </thead>
         <tbody>
@@ -23,8 +24,44 @@
                         <input type="file" name="db_file" id="db_file">
                         <input type="submit" value="Hochladen" name="submit">
                     </form>
+                    {% if apiKey.dbFilename is not empty %}
+                        <button id="removeDatabaseBtn{{ apiKey.apiKey }}" class="btn btn-secondary mt-2" type="button">
+                            <i class="bi bi-trash3"></i>
+                            Datei entfernen
+                        </button>
+                        <script>
+                            $('#removeDatabaseBtn{{ apiKey.apiKey }}').click(function () {
+                                $.ajax({
+                                    url: '{{ path('remove_database', {'apiKey': apiKey.apiKey}) }}',
+                                    method: 'POST',
+                                    success: function (result) {
+                                        getApiKeys();
+                                        $('#flashes').append(result)
+                                    }
+                                })
+                            });
+                        </script>
+                    {% endif %}
                 </td>
-                <td>{{ apiKey.fileSize | format_bytes}}</td>
+                <td>{{ apiKey.fileSize | format_bytes }}</td>
+                <td>
+                    <button id="removeApiKeyBtn{{ apiKey.apiKey }}" type="button" class="btn btn-outline-danger">
+                        <i class="bi bi-trash3"></i>
+                        API-Key löschen
+                    </button>
+                    <script>
+                        $('#removeApiKeyBtn{{ apiKey.apiKey }}').click(function () {
+                            $.ajax({
+                                url: '{{ path('remove_api_key', {'apiKey': apiKey.apiKey}) }}',
+                                method: 'DELETE',
+                                success: function (result) {
+                                    getApiKeys();
+                                    $('#flashes').append(result)
+                                }
+                            })
+                        });
+                    </script>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
