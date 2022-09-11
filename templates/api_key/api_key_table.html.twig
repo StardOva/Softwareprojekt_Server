@@ -33,7 +33,7 @@
                             $('#removeDatabaseBtn{{ apiKey.apiKey }}').click(function () {
                                 $.ajax({
                                     url: '{{ path('remove_database', {'apiKey': apiKey.apiKey}) }}',
-                                    method: 'POST',
+                                    method: 'DELETE',
                                     success: function (result) {
                                         getApiKeys();
                                         $('#flashes').append(result)

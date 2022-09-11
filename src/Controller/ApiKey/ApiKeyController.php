@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints\Uuid as UuidConstraint;
 class ApiKeyController extends AbstractController
 {
 
-    #[Route('/api_key/create', name: 'create_api_key')]
+    #[Route('/api_key/create', name: 'create_api_key', methods: ['POST'])]
     public function createApiKey(Request $request, ManagerRegistry $doctrine): Response
     {
         $uuid = Uuid::v4();
@@ -52,6 +52,44 @@ class ApiKeyController extends AbstractController
             'apiKeys' => $allKeys
         ]);
     }
+
+    #[Route('/api_key/{apiKey}', name: 'remove_api_key', methods: ['DELETE'])]
+    public function deleteApiKey(ManagerRegistry $doctrine, string $apiKey): Response
+    {
+        $entityManager = $doctrine->getManager();
+        $repo = $entityManager->getRepository(DatabaseSync::class);
+
+        // api key Format prüfen
+        if ($this->isValidUuid($apiKey)) {
+
+            $dbSync = $repo->find($apiKey);
+
+            // api key prüfen
+            if ($dbSync === null) {
+                return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
+                    ['content-type' => 'text/plain']);
+            }
+
+            if (!empty($dbSync->getDbFilename())) {
+                // Datei löschen falls sie existiert
+                $filePath = $this->getParameter('db_directory') . '/' . $dbSync->getDbFilename();
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+
+            // Datenbank Eintrag löschen
+            $repo->remove($dbSync, true);
+
+            return $this->renderForm('base/success.html.twig', [
+                'message' => 'API-Key gelöscht.'
+            ]);
+        }
+
+        return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
+            ['content-type' => 'text/plain']);
+    }
+
 
     #[Route('/database_sync/{apiKey}', name: 'upload_database', methods: ['POST'])]
     public function uploadDatabase(Request         $request, FileUploader $uploader,
@@ -146,7 +184,7 @@ class ApiKeyController extends AbstractController
 
     }
 
-    #[Route('/database_sync/{apiKey}/remove_db', name: 'remove_database', methods: ['POST'])]
+    #[Route('/database_sync/{apiKey}', name: 'remove_database', methods: ['DELETE'])]
     public function removeDatabase(ManagerRegistry $doctrine, string $apiKey): Response
     {
         $entityManager = $doctrine->getManager();
@@ -184,42 +222,6 @@ class ApiKeyController extends AbstractController
 
     }
 
-    #[Route('/database_sync/{apiKey}', name: 'remove_api_key', methods: ['DELETE'])]
-    public function deleteApiKey(ManagerRegistry $doctrine, string $apiKey): Response
-    {
-        $entityManager = $doctrine->getManager();
-        $repo = $entityManager->getRepository(DatabaseSync::class);
-
-        // api key Format prüfen
-        if ($this->isValidUuid($apiKey)) {
-
-            $dbSync = $repo->find($apiKey);
-
-            // api key prüfen
-            if ($dbSync === null) {
-                return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
-                    ['content-type' => 'text/plain']);
-            }
-
-            if (!empty($dbSync->getDbFilename())) {
-                // Datei löschen falls sie existiert
-                $filePath = $this->getParameter('db_directory') . '/' . $dbSync->getDbFilename();
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                }
-            }
-
-            // Datenbank Eintrag löschen
-            $repo->remove($dbSync, true);
-
-            return $this->renderForm('base/success.html.twig', [
-                'message' => 'API-Key gelöscht.'
-            ]);
-        }
-
-        return new Response("Operation not allowed", Response::HTTP_FORBIDDEN,
-            ['content-type' => 'text/plain']);
-    }
 
     private function isValidUuid(string $uuidToValidate): bool
     {
